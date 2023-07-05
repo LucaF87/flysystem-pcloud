@@ -1,6 +1,6 @@
 <?php
 
-namespace Unit;
+namespace LucaF87\LaravelPCloud\Tests\Unit;
 
 use LucaF87\LaravelPCloud\Providers\CustomPCloudServiceProvider;
 use Orchestra\Testbench\TestCase;
