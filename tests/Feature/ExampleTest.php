@@ -2,10 +2,12 @@
 
 namespace LucaF87\LaravelPCloud\Tests\Feature;
 
-use Faker\Core\File;
+// use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Orchestra\Testbench\TestCase;
+use Illuminate\Http\File;
 
 class ExampleTest extends TestCase
 {
@@ -20,8 +22,36 @@ class ExampleTest extends TestCase
     }
 
     public function test_pcloud(){
-        //Storage::disk('pCloud')->createDirectory('lol5');  //Funziona ma l'idee non vede il metodo
-        Storage::disk('pCloud')->createDirectory('lol7');
+
+        // Create temp file and get its absolute path
+        $tempFile = tmpfile();
+        $tempFilePath = stream_get_meta_data($tempFile)['uri'];
+
+        // Save file data in file
+        file_put_contents($tempFilePath, 'ciaoooOOOoOOOo');
+
+        $tempFileObject = new File($tempFilePath);
+        $file = new UploadedFile(
+            $tempFileObject->getPathname(),
+            $tempFileObject->getFilename(),
+            $tempFileObject->getMimeType(),
+            0,
+            true // Mark it as test, since the file isn't from real HTTP POST.
+        );
+        $path = "users/2/test_pCloud/";
+        Storage::disk('pCloud')->putFileAs($path, $file, 'ciao.txt');
+        //Storage::disk('pCloud')->put($path, $file);
+
+        $this->assertTrue(Storage::disk('pCloud')->exists($path.'ciao.txt'));
+    }
+
+    public function test_read_file(){
+
+        $path = "/users/2/test_pCloud/";
+
+        $this->assertTrue(Storage::disk('pCloud')->exists($path.'ciaoooo.txt'));
+        $file = Storage::disk('pCloud')->getFileUrl($path.'ciaoooo.txt');
+        dd($file);
     }
 
     public function test_pcloud_from_request(){

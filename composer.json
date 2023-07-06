@@ -14,7 +14,7 @@
             "email": "falbo.luca87@gmail.com"
         }
     ],
-    "minimum-stability": "stable",
+    "minimum-stability": "dev",
     "autoload-dev": {
         "psr-4": {
             "LucaF87\\LaravelPCloud\\Tests\\": "tests"
