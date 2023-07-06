@@ -1,9 +1,7 @@
 <?php
-namespace LucaF87\LaravelPCloud\Facades;
+namespace LucaF87\LaravelPCloud;
 
 use ErrorException;
-use GuzzleHttp\Psr7\UploadedFile;
-use Illuminate\Support\Facades\Storage;
 use InvalidArgumentException;
 use League\Flysystem\Config;
 use League\Flysystem\FileAttributes;
@@ -14,6 +12,7 @@ use League\Flysystem\UnableToCopyFile;
 use League\Flysystem\UnableToCreateDirectory;
 use League\Flysystem\UnableToDeleteDirectory;
 use League\Flysystem\UnableToDeleteFile;
+use League\Flysystem\UnableToListContents;
 use League\Flysystem\UnableToMoveFile;
 use League\Flysystem\UnableToReadFile;
 use League\Flysystem\UnableToRetrieveMetadata;
@@ -21,10 +20,7 @@ use League\Flysystem\UnableToWriteFile;
 use LucaF87\LaravelPCloud\Lib\PCloudFile;
 use LucaF87\LaravelPCloud\Lib\PCloudFolder;
 use pCloud\Sdk\Exception;
-use Psr\Http\Message\StreamInterface;
 use pCloud\Sdk\App;
-use pCloud\Sdk\File;
-use pCloud\Sdk\Folder;
 
 class PCloudAdapter implements FilesystemAdapter
 {
@@ -77,7 +73,28 @@ class PCloudAdapter implements FilesystemAdapter
 
     public function write(string $path, string $contents, Config $config): void
     {
-        return;$this->writeStream($path, $contents, $config);
+        $folders = explode('/',$path);
+        $fileName = array_pop($folders);
+
+        $folderParent = 0;
+        foreach ($folders as $folder) {
+            try {
+                $folder = $this->folderInstance->create($folder, $folderParent);
+                $folderParent = $folder;
+            }catch (Exception $e){
+                throw new UnableToCreateDirectory($e->getMessage()." ".$e->getCode());
+            }
+        }
+
+        $tempFile = tmpfile();
+        $tempFilePath = stream_get_meta_data($tempFile)['uri'];
+        file_put_contents($tempFilePath, $contents);
+
+        try {
+            $this->fileInstance->upload($tempFilePath, $folderParent, $fileName);
+        } catch (InvalidArgumentException $e) {
+            throw new UnableToWriteFile($e->getMessage());
+        }
     }
 
     public function writeStream(string $path, $contents, Config $config): void
@@ -106,11 +123,13 @@ class PCloudAdapter implements FilesystemAdapter
             throw new UnableToWriteFile($e->getMessage());
         }
     }
-    
-    public function getFileUrl(string $path){
+
+    public function getFileUrl(string $path)
+    {
         try {
             $url = $this->fileInstance->getLinkFromPath($path);
             return $url;
+
         } catch (ErrorException $e) {
             throw new UnableToReadFile($e->getMessage());
         }
@@ -119,20 +138,20 @@ class PCloudAdapter implements FilesystemAdapter
     public function read(string $path): string
     {
         try {
-            $url = $this->fileInstance->getFileUrl($path);
+            $url = $this->getFileUrl($path);
             return $url;
+
         } catch (ErrorException $e) {
             throw new UnableToReadFile($e->getMessage());
         }
-
-        return $content;
     }
 
     public function readStream(string $path)
     {
         try {
-            $url = $this->fileInstance->getFileUrl($path);
+            $url = $this->getFileUrl($path);
             $stream = fopen($url, 'rb');
+
         } catch (ErrorException $e) {
             throw new UnableToReadFile($e->getMessage());
         }
@@ -143,8 +162,7 @@ class PCloudAdapter implements FilesystemAdapter
     public function delete(string $path): void
     {
         try {
-            $fileId = 0;  //TODO:
-            $this->fileInstance->delete($fileId);
+            $this->fileInstance->deleteFromPath($path);
         } catch (\Exception $e) {
             throw new UnableToDeleteFile($e->getMessage());
         }
@@ -153,8 +171,7 @@ class PCloudAdapter implements FilesystemAdapter
     public function deleteDirectory(string $path): void
     {
         try {
-            $folderId = 0; //TODO:
-            $this->folderInstance->delete($folderId);
+            $this->folderInstance->deleteRecursiveFromPath($path);
         } catch (\Exception $e) {
             throw new UnableToDeleteDirectory($e->getMessage());
         }
@@ -162,10 +179,16 @@ class PCloudAdapter implements FilesystemAdapter
 
     public function createDirectory(string $path, Config $config): void
     {
-        try {
-            $this->folderInstance->create($path);
-        } catch (\Exception $e) {
-            throw new UnableToCreateDirectory($e->getMessage());
+        $folders = explode('/',$path);
+
+        $folderParent = 0;
+        foreach ($folders as $folder) {
+            try {
+                $folder = $this->folderInstance->create($folder, $folderParent);
+                $folderParent = $folder;
+            }catch (Exception $e){
+                throw new UnableToCreateDirectory($e->getMessage()." ".$e->getCode());
+            }
         }
     }
 
@@ -196,21 +219,40 @@ class PCloudAdapter implements FilesystemAdapter
 
     public function listContents(string $path, bool $deep): iterable
     {
-        // TODO: Implement listContents() method.
+        try {
+            $files = $this->folderInstance->getContentFromPath($path, $deep);
+        }catch (Exception $e){
+            throw new UnableToListContents($e->getMessage());
+        }
+
+        return $files;
     }
 
     public function move(string $source, string $destination, Config $config): void
     {
-        $fileId = 0; //TODO:
-        $folderId = 1;  //TODO:
-        $this->fileInstance->move($fileId, $folderId);
+        try {
+            $this->fileInstance->moveByPath($source, $destination);
+        }catch (Exception $e){
+            throw new UnableToMoveFile($e->getMessage());
+        }
     }
 
     public function copy(string $source, string $destination, Config $config): void
     {
-        $fileId = 0; //TODO:
-        $folderId = 1;  //TODO:
-        $this->fileInstance->copy($fileId, $folderId);
+        try{
+            $this->fileInstance->copyByPath($source, $destination);
+        }catch (Exception $e){
+            throw new UnableToCopyFile($e->getMessage());
+        }
+    }
+
+    public function rename(string $source, string $destination, Config $config): void
+    {
+        try{
+            $this->fileInstance->renameByPath($source, $destination);
+        }catch (Exception $e){
+            throw new UnableToMoveFile($e->getMessage());
+        }
     }
 
     public function getFileInfo(string $path): FileAttributes
@@ -315,24 +357,24 @@ class PCloudAdapter implements FilesystemAdapter
         curl_setopt($c, CURLOPT_URL, $url);
         curl_setopt($c, CURLOPT_RETURNTRANSFER, 1);
         //if parameters were passed to this function, then transform into POST method.. (if you need GET request, then simply change the passed URL)
-        if($post_paramtrs){ 
-            curl_setopt($c, CURLOPT_POST,TRUE);  
-            curl_setopt($c, CURLOPT_POSTFIELDS, (is_array($post_paramtrs)? http_build_query($post_paramtrs) : $post_paramtrs) ); 
+        if($post_paramtrs){
+            curl_setopt($c, CURLOPT_POST,TRUE);
+            curl_setopt($c, CURLOPT_POSTFIELDS, (is_array($post_paramtrs)? http_build_query($post_paramtrs) : $post_paramtrs) );
         }
         curl_setopt($c, CURLOPT_SSL_VERIFYHOST,false);
         curl_setopt($c, CURLOPT_SSL_VERIFYPEER,false);
         curl_setopt($c, CURLOPT_COOKIE, 'CookieName1=Value;');
-        $headers[]= "User-Agent: Mozilla/5.0 (Windows NT 6.1; rv:76.0) Gecko/20100101 Firefox/76.0";	 
-        $headers[]= "Pragma: ";  
+        $headers[]= "User-Agent: Mozilla/5.0 (Windows NT 6.1; rv:76.0) Gecko/20100101 Firefox/76.0";
+        $headers[]= "Pragma: ";
         $headers[]= "Cache-Control: max-age=0";
-        if (!empty($post_paramtrs) && !is_array($post_paramtrs) && is_object(json_decode($post_paramtrs))){ 
-            $headers[]= 'Content-Type: application/json'; 
-            $headers[]= 'Content-Length: '.strlen($post_paramtrs); 
+        if (!empty($post_paramtrs) && !is_array($post_paramtrs) && is_object(json_decode($post_paramtrs))){
+            $headers[]= 'Content-Type: application/json';
+            $headers[]= 'Content-Length: '.strlen($post_paramtrs);
         }
         curl_setopt($c, CURLOPT_HTTPHEADER, $headers);
         curl_setopt($c, CURLOPT_MAXREDIRS, 10);
         //if SAFE_MODE or OPEN_BASEDIR is set,then FollowLocation cant be used.. so...
-        $follow_allowed= ( ini_get('open_basedir') || ini_get('safe_mode')) ? false:true;  
+        $follow_allowed= ( ini_get('open_basedir') || ini_get('safe_mode')) ? false:true;
         if ($follow_allowed){
             curl_setopt($c, CURLOPT_FOLLOWLOCATION, 1);
         }
@@ -341,12 +383,12 @@ class PCloudAdapter implements FilesystemAdapter
         curl_setopt($c, CURLOPT_TIMEOUT, 60);
         curl_setopt($c, CURLOPT_AUTOREFERER, true);
         curl_setopt($c, CURLOPT_ENCODING, '');
-        
+
         $data = curl_exec($c);
-        
-        $status = curl_getinfo($c); 
+
+        $status = curl_getinfo($c);
         curl_close($c);
-        
+
         if ( $status['http_code'] != 200 ) {
             return false;
         }
