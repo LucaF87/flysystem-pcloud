@@ -6,7 +6,7 @@ use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\ServiceProvider;
 use LucaF87\LaravelPCloud\Console\CreateAuthorisationTokenCommand;
-use LucaF87\LaravelPCloud\Facades\PCloudAdapter;
+use LucaF87\LaravelPCloud\PCloudAdapter;
 use League\Flysystem\Filesystem;
 use pCloud\Sdk\App;
 use pCloud\Sdk\Folder;
@@ -47,6 +47,9 @@ class CustomPCloudServiceProvider extends ServiceProvider
             });
             FilesystemAdapter::macro('getFileUrl', function (string $path) use ($adapter) {
                 return $adapter->getFileUrl($path);
+            });
+            FilesystemAdapter::macro('renameFile', function (string $source, string $destination, $config) use ($adapter) {
+                $adapter->rename($source, $destination, $config);
             });
 
             return new FilesystemAdapter(

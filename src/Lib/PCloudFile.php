@@ -38,9 +38,9 @@ class PCloudFile extends \pCloud\Sdk\File
     }
 
     /**
-     * Get link ( using File ID )
+     * Get link ( using FilePath )
      *
-     * @param int $fileId
+     * @param string $filePath
      *
      * @return string
      * @throws Exception
@@ -62,6 +62,84 @@ class PCloudFile extends \pCloud\Sdk\File
         }
 
         return $link;
+    }
+
+    /**
+     * Delete file ( using filePath )
+     *
+     * @param string $filePath
+     *
+     * @throws Exception
+     * @noinspection PhpUnused
+     */
+    public function deleteFromPath(string $filePath)
+    {
+        $response = $this->request->get("deletefile", array("path" => "/".$filePath));
+
+        return property_exists($response, 'metadata') ? $response->metadata->isdeleted : $response;
+    }
+
+    /**
+     * Rename file ( using filePath )
+     *
+     * @param string $filePath
+     * @param string $name
+     *
+     * @throws Exception
+     * @noinspection PhpUnused
+     */
+    public function renameByPath(string $filePath, string $name)
+    {
+        if (empty($name)) {
+            throw new Exception("Please, provide valid file name!");
+        }
+
+        $params = array(
+            "path" => $filePath,
+            "toname" => $name
+        );
+
+        return $this->request->get("renamefile", $params);
+    }
+
+
+
+    /**
+     * Copy file
+     *
+     * @param string $filePath
+     * @param string $folderPath
+     *
+     * @throws Exception
+     * @noinspection PhpUnused
+     */
+    public function copyByPath(string $filePath, string $folderPath)
+    {
+        $params = array(
+            "path" => $filePath,
+            "topath" => $folderPath
+        );
+
+        return $this->request->get("copyfile", $params);
+    }
+
+    /**
+     * Moves file
+     *
+     * @param string $filePath
+     * @param string $folderPath
+     *
+     * @throws Exception
+     * @noinspection PhpUnused
+     */
+    public function moveByPath(string $filePath, string $folderPath)
+    {
+        $params = array(
+            "path" => $filePath,
+            "topath" => $folderPath
+        );
+
+        return $this->request->get("renamefile", $params);
     }
 
 }
