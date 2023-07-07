@@ -1,7 +1,7 @@
 # Flysystem adapter for Laravel
 
-[![Latest Version on Packagist](https://img.shields.io/packagist/v/LucaF87/flysystem-pcloud.svg?style=flat-square)](https://packagist.org/packages/LucaF87/flysystem-pcloud)
-[![Total Downloads](https://img.shields.io/packagist/dt/LucaF87/flysystem-pcloud.svg?style=flat-square)](https://packagist.org/packages/LucaF87/flysystem-pcloud)
+[![Latest Version on Packagist](https://img.shields.io/packagist/v/lucaf87/flysystem-pcloud.svg?style=flat-square)](https://packagist.org/packages/lucaf87/flysystem-pcloud)
+[![Total Downloads](https://img.shields.io/packagist/dt/lucaf87/flysystem-pcloud.svg?style=flat-square)](https://packagist.org/packages/lucaf87/flysystem-pcloud)
 
 Flysystem adapter for pCloud with support for Laravel v10+.
 
