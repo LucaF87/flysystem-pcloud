@@ -22,14 +22,14 @@ In order to use this package, you have to register your application in [My appli
 You can install the package via composer:
 
 ```bash
-composer require LucaF87/flysystem-pcloud
+composer require lucaf87/flysystem-pcloud
 ```
 
 or add the following to `composer.json` file
 
 ~~~~
 "require": {
-  "LucaF87/flysystem-pcloud": "1.0"
+  "lucaf87/flysystem-pcloud": "1.0"
 }
 ~~~~
 
