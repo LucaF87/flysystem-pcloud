@@ -1,6 +1,6 @@
 <?php
 
-namespace LucaF87\LaravelPCloud\Lib;
+namespace LucaF87\PCloudAdapter\Lib;
 
 use pCloud\Sdk\App;
 use pCloud\Sdk\Exception;

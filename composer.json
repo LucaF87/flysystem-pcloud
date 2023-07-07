@@ -1,11 +1,11 @@
 {
-    "name": "lucaf87/laravel-pcloud",
+    "name": "lucaf87/flysystem-pcloud",
     "type": "project",
     "license": "MIT",
     "version": "1.0.0",
     "autoload": {
         "psr-4": {
-            "LucaF87\\LaravelPCloud\\": "src/"
+            "LucaF87\\PCloudAdapter\\": "src/"
         }
     },
     "authors": [
@@ -17,7 +17,7 @@
     "minimum-stability": "dev",
     "autoload-dev": {
         "psr-4": {
-            "LucaF87\\LaravelPCloud\\Tests\\": "tests"
+            "LucaF87\\PCloudAdapter\\Tests\\": "tests"
         }
     },
     "scripts": {
@@ -30,12 +30,12 @@
     "extra": {
         "laravel": {
             "providers": [
-                "LucaF87\\LaravelPCloud\\Providers\\CustomPCloudServiceProvider"
+                "LucaF87\\PCloudAdapter\\Providers\\CustomPCloudServiceProvider"
             ],
             "aliases": {
-                "PCloud": "LucaF87\\LaravelPCloud\\Facades\\PCloud",
-                "PCloudFolder": "LucaF87\\LaravelPCloud\\Facades\\PCloudFolder",
-                "PCloudAdapter": "LucaF87\\LaravelPCloud\\Facades\\PCloudAdapter"
+                "PCloud": "LucaF87\\PCloudAdapter\\Facades\\PCloud",
+                "PCloudFolder": "LucaF87\\PCloudAdapter\\Facades\\PCloudFolder",
+                "PCloudAdapter": "LucaF87\\PCloudAdapter\\Facades\\PCloudAdapter"
             }
         }
     },

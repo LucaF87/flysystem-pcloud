@@ -1,10 +1,10 @@
 <?php
 
-namespace LucaF87\LaravelPCloud\Tests\Unit;
+namespace LucaF87\PCloudAdapter\Tests\Unit;
 
 use Illuminate\Support\Facades\Storage;
-use vendor\LaravelPCloud\src\Facades\PCloudAdapter;
-use LucaF87\LaravelPCloud\LaravelPCloud\src\Providers\CustomPCloudServiceProvider;
+use vendor\PCloudAdapter\src\Facades\PCloudAdapter;
+use LucaF87\PCloudAdapter\PCloudAdapter\src\Providers\CustomPCloudServiceProvider;
 use Orchestra\Testbench\TestCase;
 use pCloud\Sdk\App;
 use pCloud\Sdk\Folder;
