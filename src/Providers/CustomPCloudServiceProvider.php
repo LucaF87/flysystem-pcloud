@@ -16,7 +16,7 @@ class CustomPCloudServiceProvider extends ServiceProvider
 {
     public function register()
     {
-        $this->mergeConfigFrom(__DIR__ . '/../config/flysystem-pcloud.php', 'flysystem-laravel-pcloud');
+        $this->mergeConfigFrom(__DIR__ . '/../config/flysystem-pcloud.php', 'flysystem-pcloud');
 
         $this->app->bind('pcloud', function($app) {
             return new App();
