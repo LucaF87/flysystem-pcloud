@@ -2,7 +2,7 @@
     "name": "lucaf87/flysystem-pcloud",
     "type": "project",
     "license": "MIT",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "autoload": {
         "psr-4": {
             "LucaF87\\PCloudAdapter\\": "src/"
