@@ -1,25 +1,11 @@
-# pCloud SDK for Laravel
+# Flysystem adapter for Laravel
+
+[![Latest Version on Packagist](https://img.shields.io/packagist/v/lucaf87/flysystem-pcloud.svg?style=flat-square)](https://packagist.org/packages/lucaf87/flysystem-pcloud)
+[![Total Downloads](https://img.shields.io/packagist/dt/lucaf87/flysystem-pcloud.svg?style=flat-square)](https://packagist.org/packages/lucaf87/flysystem-pcloud)
+
+Flysystem adapter for pCloud with support for Laravel v10+.
 
 A PHP library to access [pCloud API](https://docs.pcloud.com/)
-
----
-
-## Table of Contents
-* [System requirements](#system-requirements)
-* [Get started](#get-started)
-  * [Register your application](#register-your-application)
-* [Install the SDK](#install-the-sdk)
-  * [Using Composer](#using-composer)
-  * [Manually](#manually)
-* [Initializing the SDK](#initializing-the-sdk)
-* [Example](#example)
-
----
-
-## System requirements
-
-  * PHP 5.6+
-  * PHP [cURL extension](http://php.net/manual/en/curl.setup.php)
 
 ---
 
@@ -27,58 +13,65 @@ A PHP library to access [pCloud API](https://docs.pcloud.com/)
 
 ### Register your application
 
-In order to use this SDK, you have to register your application in [My applications](https://docs.pcloud.com).
+In order to use this package, you have to register your application in [My applications](https://docs.pcloud.com).
 
 ---
 
-## Install the SDK
+## Installation
 
-### Using Composer
-
-Install [Composer](http://getcomposer.org/download/).
+You can install the package via composer:
 
 ```bash
-$ composer require LucaF87/laravel-pcloud
+composer require lucaf87/flysystem-pcloud
 ```
 
 or add the following to `composer.json` file
 
 ~~~~
 "require": {
-  "LucaF87/laravel-pcloud": "^1.0"
+  "lucaf87/flysystem-pcloud": "1.0"
 }
 ~~~~
 
-~~~~
+Add the following config to the `disk` array in config/filesystems.php
 
-php artisan vendor:publish --provider="LucaF87\LaravelPCloud\Providers\CustomPCloudServiceProvider" --force
+```php
+[
+    'pCloud' => [
+        'driver' => 'pCloud',
+        'clientId' => env('PCLOUD_CLIENT_ID'),
+        'clientSecret' => env('PCLOUD_CLIENT_SECRET'),
+        'accessToken' => env('PCLOUD_ACCESS_TOKEN'),
+        'locationId' => env('PCLOUD_LOCATION_ID'),
+    ]
+]
+```
 
-//Add the following to your .env
+Then set the `FILESYSTEM_DISK` to `pCloud` in your .env
 
+```env
+FILESYSTEM_DISK=pCloud
+```
+
+Publish configuration file
+```
+php artisan vendor:publish --provider="LucaF87\PCloudAdapter\Providers\CustomPCloudServiceProvider" --force
+```
+
+Add the following to your .env
+```
 PCLOUD_CLIENT_ID=[Get this from https://docs.pcloud.com/my_apps/]
 PCLOUD_CLIENT_SECRET=[Get this from https://docs.pcloud.com/my_apps/]
 PCLOUD_ACCESS_TOKEN=[leave blank]
 PCLOUD_LOCATION_ID=[leave blank]
-~~~~
-
-~~~~
-//Add the following to your config/filesystem.php
-
-'pCloud' => [
-    'driver' => 'pCloud',
-    'clientId' => env('PCLOUD_CLIENT_ID'),
-    'clientSecret' => env('PCLOUD_CLIENT_SECRET'),
-    'accessToken' => env('PCLOUD_ACCESS_TOKEN'),
-    'locationId' => env('PCLOUD_LOCATION_ID'),
-],
-~~~~
+```
 
 ---
 
 ## Generate Auth
 
 ### Artisan 
-```php artisan laravel-pcloud:token```
+```php artisan flysystem-pcloud:token```
 
 ### Manual
 Generate Authorize Code, Navigate to below link (Replace CLIENT_ID with your application Client ID)
@@ -88,69 +81,64 @@ After you get the access code and the hostname, next step is to generate Access 
 **Before you navigate to below link, make sure to replace Client ID, Secret and Access Code & THE HOST NAME (api.pcloud.com) with what was on the page before
 https://api.pcloud.com/oauth2_token?client_id=xxxxxxxxx&client_secret=xxxxxxxxx&code=xxxxxxxxx
 
-Copy the access_token and the locationid to the .env
+``` 
+Copy the access_token and the locationid to the .env 
+```
 
 ---
 
 ## Example
-~~~~
-use pCloud\Sdk\App;
-use pCloud\Sdk\File;
-use pCloud\Sdk\Folder;
+```php
 
-protected $pCloudApp;
+Storage::disk('pCloud')->putFileAs('files', new File('/tmp/file.txt'), 'file-name.txt');
 
-public function __construct()
-{
-    $this->pCloudApp = new App();
-    $this->pCloudApp->setAccessToken(config('laravel-pcloud.access_token'));
-    $this->pCloudApp->setLocationId(config('laravel-pcloud.location_id'));
-}
+Storage::disk('pCloud')->exists('/files/file-name.txt'));
 
-// Create Folder instance
+Storage::disk('pCloud')->fileUrl('/files/file-name.txt'));
 
-$pcloudFolder = new Folder($this->pCloudApp);
+```
 
-// Create new folder in root
+**Get the content of a file (Work in progress)**
+```php
+$contents = Storage::disk('pCloud')->get('/files/file-name.txt');
+```
 
-$folderId = $pcloudFolder->create("New folder");
+**Deleting a file:**
+```php
+Storage::disk('pCloud')->delete('/files/file-name.txt');
+```
+**Deleting a directory:**
+```php
+Storage::disk('pCloud')->deleteDirectory('/files'));
+Storage::disk('pCloud')->deleteDirectory('/files/test'));
+```
 
-// Create File instance
+**Getting the mimetype of a file**
+```php
+$mimeType = Storage::disk('pCloud')->mimeType('/files/file-name.txt');
+```
 
-$pcloudFile = new File($this->pCloudApp);
+**Get the info of a file**
+```php
+$bytes = Storage::disk('pCloud')->fileInfo('/files/file-name.txt');
+```
 
-// Upload new file in created folder
+**Get a list of files**
+```php
+$files = Storage::disk('pCloud')->files('/files'));
+```
 
-$fileMetadata = $pcloudFile->upload("./sample.png", $folderId);
+## Testing
 
-// Get folder content
+```bash
+composer test
+```
 
-$folderContent = $pcloudFolder->getContent($folderId);
+## Credits
 
-// Get file
+- [LucaF87](https://github.com/LucaF87)
+- [All Contributors](../../contributors)
 
-$pcloudFile = new File($this->pCloudApp);
-$pcloudFile->getLink((int)$fileMetadata->metadata->fileid)
-~~~~
+## License
 
-### Creating custom requests
-
-~~~~
-use pCloud\Sdk\Request;
-use pCloud\Sdk\App;
-
-protected $pCloudApp;
-
-public function __construct()
-{
-    $this->pCloudApp = new App();
-    $this->pCloudApp->setAccessToken(config('laravel-pcloud.access_token'));
-    $this->pCloudApp->setLocationId(config('laravel-pcloud.location_id'));
-}
-
-$method = "userinfo";
-$params = array();
-
-$request = new Request($this->pCloudApp);
-$response = $request->get($method, $params); // the second argument is optional
-~~~~
+The MIT License (MIT). Please see [License File](LICENSE.md) for more information.

@@ -1,10 +1,13 @@
 <?php
 
-namespace LucaF87\LaravelPCloud\Providers;
+namespace LucaF87\PCloudAdapter\Providers;
 
+use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\ServiceProvider;
-use LucaF87\LaravelPCloud\Facades\PCloudAdapter;
+use LucaF87\PCloudAdapter\Console\CreateAuthorisationTokenCommand;
+use LucaF87\PCloudAdapter\PCloudAdapter;
+use League\Flysystem\Filesystem;
 use pCloud\Sdk\App;
 use pCloud\Sdk\Folder;
 use pCloud\Sdk\File;
@@ -13,7 +16,7 @@ class CustomPCloudServiceProvider extends ServiceProvider
 {
     public function register()
     {
-        $this->mergeConfigFrom(__DIR__.'/../config/laravel-pcloud.php', 'laravel-pcloud.php');
+        $this->mergeConfigFrom(__DIR__ . '/../config/flysystem-pcloud.php', 'flysystem-pcloud');
 
         $this->app->bind('pcloud', function($app) {
             return new App();
@@ -24,11 +27,11 @@ class CustomPCloudServiceProvider extends ServiceProvider
     {
         $this->publishes([
             // Config
-            __DIR__.'/../config/laravel-pcloud.php' => config_path('laravel-pcloud.php'),            
-        ], 'laravel-pcloud');
+            __DIR__ . '/../config/flysystem-pcloud.php' => config_path('flysystem-pcloud.php'),
+        ], 'flysystem-pcloud');
 
         $this->commands([
-            \LucaF87\LaravelPCloud\Console\CreateAuthorisationTokenCommand ::class,
+            CreateAuthorisationTokenCommand::class
         ]);
 
         Storage::extend('pCloud', function($app, $config) {
@@ -37,9 +40,23 @@ class CustomPCloudServiceProvider extends ServiceProvider
             $client->setAppSecret($config['clientSecret']);
             $client->setAccessToken($config['accessToken']);
             $client->setLocationId($config['locationId']);
-            $adapter = new PCloudAdapter($client, '/');
+            $adapter = new PCloudAdapter($client);
 
-            return new \League\Flysystem\Filesystem($adapter);
+            FilesystemAdapter::macro('fileInfo', function (string $path) use ($adapter) {
+                return $adapter->getFileInfo($path);
+            });
+            FilesystemAdapter::macro('fileUrl', function (string $path) use ($adapter) {
+                return $adapter->getFileUrl($path);
+            });
+            FilesystemAdapter::macro('renameFile', function (string $source, string $destination, $config) use ($adapter) {
+                $adapter->rename($source, $destination, $config);
+            });
+
+            return new FilesystemAdapter(
+                new Filesystem($adapter, $config),
+                $adapter,
+                $config
+            );
         });
     }
 }

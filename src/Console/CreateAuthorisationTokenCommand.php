@@ -1,6 +1,6 @@
 <?php
 
-namespace LucaF87\LaravelPCloud\Console;
+namespace LucaF87\PCloudAdapter\Console;
 
 use Illuminate\Console\Command;
 use pCloud\Sdk\App;
@@ -8,7 +8,7 @@ use pCloud\Sdk\App;
 class CreateAuthorisationTokenCommand extends Command
 {
 
-    protected $signature = 'laravel-pcloud:token';
+    protected $signature = 'flysystem-pcloud:token';
 
     protected $description = 'Create the Authorization token used to generate the access token';
 
@@ -19,8 +19,8 @@ class CreateAuthorisationTokenCommand extends Command
         parent::__construct();
 
         $this->pCloudApp = new App();
-        $this->pCloudApp->setAppKey(config('laravel-pcloud.client_id'));
-        $this->pCloudApp->setAppSecret(config('laravel-pcloud.client_secret'));
+        $this->pCloudApp->setAppKey(config('flysystem-pcloud.client_id',''));
+        $this->pCloudApp->setAppSecret(config('flysystem-pcloud.client_secret',''));
     }
 
     public function handle()
