@@ -1,5 +1,5 @@
 <?php
-namespace LucaF87\LaravelPCloud;
+namespace LucaF87\PCloudAdapter;
 
 use ErrorException;
 use InvalidArgumentException;
@@ -17,8 +17,8 @@ use League\Flysystem\UnableToMoveFile;
 use League\Flysystem\UnableToReadFile;
 use League\Flysystem\UnableToRetrieveMetadata;
 use League\Flysystem\UnableToWriteFile;
-use LucaF87\LaravelPCloud\Lib\PCloudFile;
-use LucaF87\LaravelPCloud\Lib\PCloudFolder;
+use LucaF87\PCloudAdapter\Lib\PCloudFile;
+use LucaF87\PCloudAdapter\Lib\PCloudFolder;
 use pCloud\Sdk\Exception;
 use pCloud\Sdk\App;
 
@@ -269,16 +269,25 @@ class PCloudAdapter implements FilesystemAdapter
     public function getFileAttributes($file)
     {
         return new FileAttributes(
-            path: $file->getUuid(),
-            fileSize: $file->getSize(),
-            lastModified: $file->getDatetimeUploaded() ? strtotime($file->getDatetimeUploaded()->format('Y-m-d H:i:s')) : null,
-            mimeType: $file->getMimeType(),
-            extraMetadata: array_merge([
-                'originalFilename' => $file->getOriginalFilename(),
-            ],
-                (array)$file->getMetadata()
-            )
+            path: $file->parentfolderid,
+            fileSize: $file->size,
+            lastModified: strtotime($file->modified),
+            mimeType: $file->contenttype,
+            extraMetadata: [
+                'originalFilename' => $file->name,
+                'fileId' => $file->fileid,
+                'created' => $file->created,
+                'lastModifier' => $file->modified
+            ]
         );
+    }
+
+    protected function convertToReadableSize($size)
+    {
+        $base = log($size) / log(1024);
+        $suffix = array("B", "KB", "MB", "GB", "TB");
+        $f_base = floor($base);
+        return round(pow(1024, $base - floor($base)), 1) . $suffix[$f_base];
     }
 
     protected function readFileChunk($handle, $chunkSize)

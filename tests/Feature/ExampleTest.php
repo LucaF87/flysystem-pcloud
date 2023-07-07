@@ -1,6 +1,6 @@
 <?php
 
-namespace LucaF87\LaravelPCloud\Tests\Feature;
+namespace LucaF87\PCloudAdapter\Tests\Feature;
 
 // use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;
@@ -28,7 +28,7 @@ class ExampleTest extends TestCase
         $tempFilePath = stream_get_meta_data($tempFile)['uri'];
 
         // Save file data in file
-        file_put_contents($tempFilePath, 'ciaoooOOOoOOOo');
+        file_put_contents($tempFilePath, 'test text');
 
         $tempFileObject = new File($tempFilePath);
         $file = new UploadedFile(
@@ -36,27 +36,22 @@ class ExampleTest extends TestCase
             $tempFileObject->getFilename(),
             $tempFileObject->getMimeType(),
             0,
-            true // Mark it as test, since the file isn't from real HTTP POST.
+            true
         );
-        $path = "users/2/test_pCloud/";
-        Storage::disk('pCloud')->putFileAs($path, $file, 'ciao.txt');
+        $path = "users/2/test/";
+        Storage::disk('pCloud')->putFileAs($path, $file, 'hello.txt');
         //Storage::disk('pCloud')->put($path, $file);
 
-        $this->assertTrue(Storage::disk('pCloud')->exists($path.'ciao.txt'));
+        $this->assertTrue(Storage::disk('pCloud')->exists($path.'hello.txt'));
     }
 
     public function test_read_file(){
 
-        $path = "/users/2/test_pCloud/";
+        $path = "/users/2/test/";
 
-        $this->assertTrue(Storage::disk('pCloud')->exists($path.'ciaoooo.txt'));
-        $file = Storage::disk('pCloud')->getFileUrl($path.'ciaoooo.txt');
-        dd($file);
+        $this->assertTrue(Storage::disk('pCloud')->exists($path.'hello.txt'));
+        $file = Storage::disk('pCloud')->get($path.'hello.txt');
+        $files = Storage::disk('pCloud')->files($path.'hello.txt');
     }
 
-    public function test_pcloud_from_request(){
-
-        $file = new \Symfony\Component\HttpFoundation\File\File();
-        $file->storeAs();
-    }
 }

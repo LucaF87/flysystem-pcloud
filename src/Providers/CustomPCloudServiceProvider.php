@@ -1,12 +1,12 @@
 <?php
 
-namespace LucaF87\LaravelPCloud\Providers;
+namespace LucaF87\PCloudAdapter\Providers;
 
 use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\ServiceProvider;
-use LucaF87\LaravelPCloud\Console\CreateAuthorisationTokenCommand;
-use LucaF87\LaravelPCloud\PCloudAdapter;
+use LucaF87\PCloudAdapter\Console\CreateAuthorisationTokenCommand;
+use LucaF87\PCloudAdapter\PCloudAdapter;
 use League\Flysystem\Filesystem;
 use pCloud\Sdk\App;
 use pCloud\Sdk\Folder;
@@ -16,7 +16,7 @@ class CustomPCloudServiceProvider extends ServiceProvider
 {
     public function register()
     {
-        $this->mergeConfigFrom(__DIR__ . '/../config/laravel-pcloud.php', 'laravel-pcloud');
+        $this->mergeConfigFrom(__DIR__ . '/../config/flysystem-pcloud.php', 'flysystem-laravel-pcloud');
 
         $this->app->bind('pcloud', function($app) {
             return new App();
@@ -27,8 +27,8 @@ class CustomPCloudServiceProvider extends ServiceProvider
     {
         $this->publishes([
             // Config
-            __DIR__ . '/../config/laravel-pcloud.php' => config_path('laravel-pcloud.php'),
-        ], 'laravel-pcloud');
+            __DIR__ . '/../config/flysystem-pcloud.php' => config_path('flysystem-pcloud.php'),
+        ], 'flysystem-pcloud');
 
         $this->commands([
             CreateAuthorisationTokenCommand::class
@@ -45,7 +45,7 @@ class CustomPCloudServiceProvider extends ServiceProvider
             FilesystemAdapter::macro('fileInfo', function (string $path) use ($adapter) {
                 return $adapter->getFileInfo($path);
             });
-            FilesystemAdapter::macro('getFileUrl', function (string $path) use ($adapter) {
+            FilesystemAdapter::macro('fileUrl', function (string $path) use ($adapter) {
                 return $adapter->getFileUrl($path);
             });
             FilesystemAdapter::macro('renameFile', function (string $source, string $destination, $config) use ($adapter) {

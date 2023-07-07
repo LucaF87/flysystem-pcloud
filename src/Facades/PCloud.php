@@ -1,6 +1,6 @@
 <?php
 
-namespace LucaF87\LaravelPCloud\Facades;
+namespace LucaF87\PCloudAdapter\Facades;
 
 use Illuminate\Support\Facades\Facade;
 
