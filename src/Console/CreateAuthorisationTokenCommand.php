@@ -19,8 +19,8 @@ class CreateAuthorisationTokenCommand extends Command
         parent::__construct();
 
         $this->pCloudApp = new App();
-        $this->pCloudApp->setAppKey(config('flysystem-pcloud.client_id',''));
-        $this->pCloudApp->setAppSecret(config('flysystem-pcloud.client_secret',''));
+        $this->pCloudApp->setAppKey(config('flysystem-pcloud.client_id') ?? '');
+        $this->pCloudApp->setAppSecret(config('flysystem-pcloud.client_secret') ?? '');
     }
 
     public function handle()
