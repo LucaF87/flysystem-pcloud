@@ -5,6 +5,7 @@ namespace LucaF87\PCloudAdapter\Lib;
 use pCloud\Sdk\App;
 use pCloud\Sdk\Exception;
 use pCloud\Sdk\Request;
+use pCloud\Sdk\Config;
 
 class PCloudFile extends \pCloud\Sdk\File
 {
@@ -62,6 +63,46 @@ class PCloudFile extends \pCloud\Sdk\File
         }
 
         return $link;
+    }
+
+    /**
+     * Download file  ( using FilePath )
+     *
+     * @param string $filePath File Path
+     * @param string $destination The destination, where the file will be stored!
+     *
+     * @return string
+     * @throws Exception
+     * @noinspection PhpUnused
+     */
+    public function downloadFromPath(string $filePath, string $destination = ""): string
+    {
+        $fileLink = $this->getLinkFromPath($filePath);
+
+        if (!empty($destination)) {
+            $destination = str_replace(array("\\", "/"), DIRECTORY_SEPARATOR, $destination) . DIRECTORY_SEPARATOR;
+        }
+
+        if (!empty($destination) && !is_dir($destination)) {
+            if (!mkdir($destination,0777,true)) {
+                throw new Exception("Couldn't create destination folder");
+            }
+        }
+
+        $parts = explode("/", $fileLink);
+        $path = $destination . rawurldecode(end($parts));
+
+        $source = fopen($fileLink, "rb");
+        $file = fopen($path . ".download", "wb");
+        while (!feof($source)) {
+            $content = fread($source, Config::$filePartSize);
+            fwrite($file, $content);
+        }
+        fclose($file);
+        fclose($source);
+
+        rename($path . ".download", $path);
+        return $path;
     }
 
     /**

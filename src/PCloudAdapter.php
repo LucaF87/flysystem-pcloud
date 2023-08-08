@@ -127,8 +127,7 @@ class PCloudAdapter implements FilesystemAdapter
     public function getFileUrl(string $path)
     {
         try {
-            $url = $this->fileInstance->getLinkFromPath($path);
-            return $url;
+            return $this->fileInstance->getLinkFromPath($path);
 
         } catch (ErrorException $e) {
             throw new UnableToReadFile($e->getMessage());
@@ -138,8 +137,7 @@ class PCloudAdapter implements FilesystemAdapter
     public function read(string $path): string
     {
         try {
-            $url = $this->getFileUrl($path);
-            return $url;
+            return $this->fileInstance->downloadFromPath($path, storage_path('app/'.dirname($path)));
 
         } catch (ErrorException $e) {
             throw new UnableToReadFile($e->getMessage());
@@ -149,7 +147,7 @@ class PCloudAdapter implements FilesystemAdapter
     public function readStream(string $path)
     {
         try {
-            $url = $this->getFileUrl($path);
+            $url = $this->fileInstance->downloadFromPath($path, storage_path('app/'.dirname($path)));
             $stream = fopen($url, 'rb');
 
         } catch (ErrorException $e) {

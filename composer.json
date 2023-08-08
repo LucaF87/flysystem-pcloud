@@ -2,7 +2,7 @@
     "name": "lucaf87/flysystem-pcloud",
     "type": "project",
     "license": "MIT",
-    "version": "1.0.3",
+    "version": "1.0.4",
     "autoload": {
         "psr-4": {
             "LucaF87\\PCloudAdapter\\": "src/"
@@ -14,7 +14,7 @@
             "email": "falbo.luca87@gmail.com"
         }
     ],
-    "minimum-stability": "dev",
+    "minimum-stability": "stable",
     "autoload-dev": {
         "psr-4": {
             "LucaF87\\PCloudAdapter\\Tests\\": "tests"

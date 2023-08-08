@@ -94,13 +94,23 @@ Storage::disk('pCloud')->putFileAs('files', new File('/tmp/file.txt'), 'file-nam
 
 Storage::disk('pCloud')->exists('/files/file-name.txt'));
 
-Storage::disk('pCloud')->fileUrl('/files/file-name.txt'));
+$full_path = Storage::disk('pCloud')->get('/files/file-name.txt');
 
 ```
 
-**Get the content of a file (Work in progress)**
+**Download file in local storage and return the full path**
 ```php
-$contents = Storage::disk('pCloud')->get('/files/file-name.txt');
+$full_path = Storage::disk('pCloud')->get('/files/file-name.txt');
+```
+
+**Get a cloud link of a file (It may give problems with different IP addresses)**
+```php
+$url = Storage::disk('pCloud')->fileUrl('/files/file-name.txt'));
+```
+
+**Download file in local storage and return the content of a file**
+```php
+$contents = Storage::disk('pCloud')->readStream('/files/file-name.txt');
 ```
 
 **Deleting a file:**
