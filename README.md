@@ -64,6 +64,7 @@ PCLOUD_CLIENT_ID=[Get this from https://docs.pcloud.com/my_apps/]
 PCLOUD_CLIENT_SECRET=[Get this from https://docs.pcloud.com/my_apps/]
 PCLOUD_ACCESS_TOKEN=[leave blank]
 PCLOUD_LOCATION_ID=[leave blank]
+PCLOUD_LOCAL_FILE_KEEP_ALIVE=60
 ```
 
 ---
@@ -136,6 +137,13 @@ $bytes = Storage::disk('pCloud')->fileInfo('/files/file-name.txt');
 **Get a list of files**
 ```php
 $files = Storage::disk('pCloud')->files('/files'));
+```
+
+## Clean local storage
+Since pCloud needs to download files locally in order to access them, I created a command to delete files from local storage older than 1 hour (parameter customizable from config).
+You just have to schedule it inside the Console/Kernel.php file
+```php
+php artisan flysystem-pcloud:clean-local-storage
 ```
 
 ## Testing

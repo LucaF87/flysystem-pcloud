@@ -5,6 +5,7 @@ namespace LucaF87\PCloudAdapter\Providers;
 use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\ServiceProvider;
+use LucaF87\PCloudAdapter\Console\CleanLocalStorage;
 use LucaF87\PCloudAdapter\Console\CreateAuthorisationTokenCommand;
 use LucaF87\PCloudAdapter\PCloudAdapter;
 use League\Flysystem\Filesystem;
@@ -31,7 +32,8 @@ class CustomPCloudServiceProvider extends ServiceProvider
         ], 'flysystem-pcloud');
 
         $this->commands([
-            CreateAuthorisationTokenCommand::class
+            CreateAuthorisationTokenCommand::class,
+            CleanLocalStorage::class
         ]);
 
         Storage::extend('pCloud', function($app, $config) {
